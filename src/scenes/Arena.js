@@ -96,6 +96,7 @@ class Arena extends Phaser.Scene {
             this.add.text(game.config.width/2, game.config.height/2, 'GAME OVER', scoreConfig).setOrigin(0.5);
             this.add.text(game.config.width/2, game.config.height/2 + 64, 'R to (R)estart, Spacebar for Menu', scoreConfig).setOrigin(0.5);
             this.gameOver = true;
+            this.disableObjects();
         }, null, this);     
     }
     
@@ -108,7 +109,6 @@ class Arena extends Phaser.Scene {
             if (Phaser.Input.Keyboard.JustDown(keySPACE)) {
                 this.scene.start('menuScene');
             }
-            this.disableObjects();
         }
         
         // scroll tile sprite
