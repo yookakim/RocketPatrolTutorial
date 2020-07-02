@@ -1,17 +1,21 @@
+'use strict';
 class Menu extends Phaser.Scene {
     constructor() {
         super("menuScene");
     }
 
     preload() {
-        // load audio
-        this.load.audio('sfx_select', './assets/blip_select12.wav');
-        this.load.audio('sfx_explosion', './assets/explosion38.wav');
-        this.load.audio('sfx_rocket', './assets/rocket_shot.wav');
+      // load audio
+      this.load.audio('sfx_select', './assets/blip_select12.wav');
+      this.load.audio('sfx_explosion', './assets/explosion38.wav');
+      this.load.audio('sfx_rocket', './assets/rocket_shot.wav');
     }    
-
+    
     create() {
-        this.add.text(20, 20, "Rocket Patrol Menu Test");
+      //define keyboard inputs for this scene
+      keyLEFT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
+      keyRIGHT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
+
         let menuConfig = {
             fontFamily: 'Courier',
             fontSize: '28px',
@@ -35,9 +39,7 @@ class Menu extends Phaser.Scene {
         menuConfig.backgroundColor = '#00FF00';
         menuConfig.color = "#000";
         this.add.text(centerX, centerY + textSpacer, "Press Left for Easy or Right for Hard", menuConfig).setOrigin(0.5);
-        //this.scene.start("playScene");
-        keyLEFT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
-        keyRIGHT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
+        
     }
 
     update() {
@@ -45,19 +47,19 @@ class Menu extends Phaser.Scene {
             // easy:
             game.settings = {
               spaceshipSpeed: 3,
-              gameTimer: 60000,   
+              gameTimer: 3000,   
             }
             this.sound.play('sfx_select');
-            this.scene.start("playScene");    
+            this.scene.start("arenaScene");    
           }
           if (Phaser.Input.Keyboard.JustDown(keyRIGHT)) {
             // hard:
             game.settings = {
               spaceshipSpeed: 4,
-              gameTimer: 45000,  
+              gameTimer: 8000,  
             }
             this.sound.play('sfx_select');
-            this.scene.start("playScene");    
+            this.scene.start("arenaScene");    
           }
     }
 
