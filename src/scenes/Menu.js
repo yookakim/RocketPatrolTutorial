@@ -50,7 +50,7 @@ class Menu extends Phaser.Scene {
               gameTimer: 3000,   
             }
             this.sound.play('sfx_select');
-            this.scene.start("arenaScene");    
+            this.scene.start("arenaScene");
           }
           if (Phaser.Input.Keyboard.JustDown(keyRIGHT)) {
             // hard:

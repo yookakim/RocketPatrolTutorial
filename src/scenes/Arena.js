@@ -33,7 +33,7 @@ class Arena extends Phaser.Scene {
         });
         
         this.p1Score = 0;
-        console.log('p1 score 69:' + this.p1Score);
+
         let scoreConfig = {
             fontFamily: 'Courier',
             fontSize: '28px',
@@ -48,7 +48,12 @@ class Arena extends Phaser.Scene {
         }
     
         this.scoreLeft = this.add.text(69, 54, this.p1Score, scoreConfig);
-        console.log('p1 score 36:' + this.p1Score);
+
+
+        this.scoreLeft.on('scoreChange', function() {
+            this.scoreLeft.updateText();
+        })
+        console.log(this.scoreLeft);
         // add rocket (player 1)
         this.p1Rocket = new Rocket(this, game.config.width/2, 431, 'rocket', 0);
         
@@ -117,7 +122,7 @@ class Arena extends Phaser.Scene {
             // update rocket
             this.p1Rocket.update();
         }
-*/
+*/      
 
 
         // if(this.checkCollision(this.p1Rocket, this.ship03)) {
@@ -219,8 +224,8 @@ class Arena extends Phaser.Scene {
 
     changeScore(score) {
     //isolate score-changing function from shipDestroy, for more flexibility
-        console.log('p1 score 198:' + this.p1Score);
         this.p1Score += score;
+        this.scoreLeft.text = this.p1Score;
     }
 
     inputSetup() {
