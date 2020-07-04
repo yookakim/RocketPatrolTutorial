@@ -4,6 +4,15 @@ let config = {
     type: Phaser.Canvas,
     width: 640,
     height: 480,
+    fps: {
+        target: 140,
+    },
+    physics: {
+        default: 'arcade',
+        arcade: {
+            debug: true,
+        },
+    },
     scene: [ Menu, Arena ],
 }
 

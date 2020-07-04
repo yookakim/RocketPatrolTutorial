@@ -14,25 +14,17 @@ class Arena extends Phaser.Scene {
         // load spritesheet
         this.load.spritesheet('explosion', './assets/explosion.png', {frameWidth: 64, frameHeight: 32, startFrame: 0, endFrame: 9});
     }
-
+    
     create() {
         // define keys
-        keyF = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
-        keyR = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
-        keyLEFT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
-        keyRIGHT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
-        keySPACE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+        // this.physics.world.setFPS(60);
         
-        // white rectangular borders
         this.starfield = this.add.tileSprite(0, 0, 640, 480, 'starfield').setOrigin(0, 0);
+        // white rectangular borders
         
-        this.add.rectangle(5, 5, 630, 32, 0xFFFFFF).setOrigin(0, 0);
-        this.add.rectangle(5, 443, 630, 32, 0xFFFFFF).setOrigin(0, 0);
-        this.add.rectangle(5, 5, 32, 455, 0xFFFFFF).setOrigin(0, 0);
-        this.add.rectangle(603, 5, 32, 455, 0xFFFFFF).setOrigin(0, 0);
-        // green UI background
-        this.add.rectangle(37, 42, 566, 64, 0x00FF00).setOrigin(0, 0);
-
+        this.drawUI();
+        this.inputSetup();
+        
         //create explosion animation from preloaded spritesheet
         this.anims.create({
             key: 'explode',
@@ -40,39 +32,8 @@ class Arena extends Phaser.Scene {
             frameRate: 30
         });
         
-        // add rocket (player 1)
-        this.p1Rocket = new Rocket(this, game.config.width/2, 431, 'rocket', 0);
-        this.p1Rocket.setScale(0.5, 0.5);
-        this.p1Rocket.setOrigin(0, 0);
-        this.p1Rocket.setActive(true);
-
-        
-        
-        // create game object pool for spaceships
-
-        /*
-            Referenced code example for sprite pool from official Phaser website:
-            https://github.com/photonstorm/phaser3-examples/blob/master/public/src/game%20objects/group/sprite%20pool.js
-        */
-
-        // this.spaceshipGroup = this.add.group({
-        //     defaultKey: 'spaceship',            //
-        //     runChildUpdate: true,
-        //     createCallback: function (spaceship) {
-                
-        //     },
-        // });
-        
-        // add spaceships (x3)
-        this.ship01 = this.shipSpawn(game.config.width + 192, 132, 30);
-        this.ship02 = this.shipSpawn(game.config.width + 96, 196, 20);
-        this.ship03 = this.shipSpawn(game.config.width, 260, 10);
-        
-        console.log(this.ship01);
-
-        // score
         this.p1Score = 0;
-        
+        console.log('p1 score 69:' + this.p1Score);
         let scoreConfig = {
             fontFamily: 'Courier',
             fontSize: '28px',
@@ -85,7 +46,43 @@ class Arena extends Phaser.Scene {
             },
             fixedWidth: 100
         }
+    
         this.scoreLeft = this.add.text(69, 54, this.p1Score, scoreConfig);
+        console.log('p1 score 36:' + this.p1Score);
+        // add rocket (player 1)
+        this.p1Rocket = new Rocket(this, game.config.width/2, 431, 'rocket', 0);
+        
+        this.p1Rocket.setScale(0.5, 0.5);
+        this.p1Rocket.setOrigin(0, 0);
+        this.p1Rocket.setActive(true);
+        
+        
+        
+        // create game object pool for spaceships
+        
+        
+        /*
+            Referenced code from sprite pool example from official Phaser website:
+            https://github.com/photonstorm/phaser3-examples/blob/master/public/src/game%20objects/group/sprite%20pool.js
+        */
+
+        this.spaceshipGroup = this.add.group({       //
+            // runChildUpdate: true,
+        });
+        
+        // add spaceships (x3)
+        // shipAdd returns a gameobject of type Spaceship
+
+
+        this.spaceshipGroup.add(this.shipAdd(game.config.width + 192, 132, 30));
+        this.spaceshipGroup.add(this.shipAdd(game.config.width + 96, 196, 20));
+        this.spaceshipGroup.add(this.shipAdd(game.config.width, 260, 10));
+
+        console.log('p1 score 66:' + this.p1Score);
+
+        this.physics.add.overlap(this.spaceshipGroup, this.p1Rocket, this.destroyEvent, null, this);
+        
+        // score
         
         // game over flag
         this.gameOver = false;
@@ -100,7 +97,9 @@ class Arena extends Phaser.Scene {
         }, null, this);     
     }
     
-    update() {
+
+
+    update(time, delta) {
         // check key input for restart
         if (this.gameOver) {
             if (this.gameOver && Phaser.Input.Keyboard.JustDown(keyR)) {
@@ -112,7 +111,7 @@ class Arena extends Phaser.Scene {
         }
         
         // scroll tile sprite
-        this.starfield.tilePositionX -= 4;
+        this.starfield.tilePositionX -= 8 * delta/60;
 /*
         if (!this.gameOver) {
             // update rocket
@@ -121,36 +120,36 @@ class Arena extends Phaser.Scene {
 */
 
 
-        if(this.checkCollision(this.p1Rocket, this.ship03)) {
-            this.p1Rocket.reset();
-            this.shipDestroy(this.ship03);
-        }
+        // if(this.checkCollision(this.p1Rocket, this.ship03)) {
+        //     this.p1Rocket.reset();
+        //     this.shipDestroy(this.ship03);
+        // }
         
-        if(this.checkCollision(this.p1Rocket, this.ship02)) {
-            this.p1Rocket.reset();
-            this.shipDestroy(this.ship02);
-        }
+        // if(this.checkCollision(this.p1Rocket, this.ship02)) {
+        //     this.p1Rocket.reset();
+        //     this.shipDestroy(this.ship02);
+        // }
         
-        if(this.checkCollision(this.p1Rocket, this.ship01)) {
-            this.p1Rocket.reset();
-            this.shipDestroy(this.ship01);
-        }
+        // if(this.checkCollision(this.p1Rocket, this.ship01)) {
+        //     this.p1Rocket.reset();
+        //     this.shipDestroy(this.ship01);
+        // }
         
     }
 
-    checkCollision(rocket, ship) {
-        // simple AABB checking
-        if( rocket.x < ship.x + ship.width &&
-            rocket.x + rocket.width > ship.x &&
-            rocket.y < ship.y + ship.height &&
-            rocket.height + rocket.y > ship.y) {
-                return true;
-        } else {
-            return false;
-        }
-    }
+    // checkCollision(rocket, ship) {
+    //     // simple AABB checking
+    //     if( rocket.x < ship.x + ship.width &&
+    //         rocket.x + rocket.width > ship.x &&
+    //         rocket.y < ship.y + ship.height &&
+    //         rocket.height + rocket.y > ship.y) {
+    //             return true;
+    //     } else {
+    //         return false;
+    //     }
+    // }
 
-    shipSpawn(x, y, pointsValue) {
+    shipAdd(x, y, pointsValue) {
         
         var tempShip = new Spaceship(this, x, y, 'spaceship', 0, pointsValue);
 
@@ -159,12 +158,11 @@ class Arena extends Phaser.Scene {
         tempShip.setVisible(true);
 
         // set origin to upper left corner
-        tempShip.setOrigin(0, 0);
-            
-        return tempShip;
+        tempShip.setOrigin(0, 0);     
         
+        return tempShip;
     }
-
+/*
     shipDestroy(ship) {
         ship.alpha = 0;                         // temporarily hide ship
         // create explosion sprite at ship's position
@@ -180,18 +178,65 @@ class Arena extends Phaser.Scene {
         this.scoreLeft.text = this.p1Score;
         this.sound.play('sfx_explosion');         
     }
+*/
 
+    destroyEvent(spaceship, rocket) {
+        // change score:
+        this.changeScore(spaceship.points);
+        console.log('score after in destroyEvent:' + this.p1Score);
+
+        // on destroy event, spawn a new one in respective tiers
+
+        //  (instead of just resetting position, I simply destroy the game object
+        //  and respawn a new one. it's probably less efficient, but it seemed to
+        //  make more sense)
+
+        this.spaceshipGroup.add(this.shipAdd(game.config.width, spaceship.y, spaceship.points));
+        
+        this.shipDestroy(spaceship, rocket);
+    }
+    
+    shipDestroy(spaceship, rocket) {
+        console.log('destroying ship');
+        this.changeScore(spaceship.points);
+        spaceship.onExplode(this);
+    }
+    
     disableObjects() {
-        this.ship01.setActive(false);
-        this.ship02.setActive(false);
-        this.ship03.setActive(false);
+        // this.ship01.setActive(false);
+        // this.ship02.setActive(false);
+        // this.ship03.setActive(false);
+        this.spaceshipGroup.children.each(function (spaceship) {
+            // spaceship.setActive(false);
+            this.physics.world.disableBody(spaceship.body);
+            // this.spaceshipGroup.killAndHide(spaceship);
+        }, this);
         this.p1Rocket.setActive(false);
         this.starfield.setActive(false);
 
     }
+    
 
     changeScore(score) {
     //isolate score-changing function from shipDestroy, for more flexibility
+        console.log('p1 score 198:' + this.p1Score);
         this.p1Score += score;
+    }
+
+    inputSetup() {
+        keyF = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
+        keyR = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+        keyLEFT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
+        keyRIGHT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
+        keySPACE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    }
+    
+    drawUI() {
+        this.add.rectangle(5, 5, 630, 32, 0xFFFFFF).setOrigin(0, 0);
+        this.add.rectangle(5, 443, 630, 32, 0xFFFFFF).setOrigin(0, 0);
+        this.add.rectangle(5, 5, 32, 455, 0xFFFFFF).setOrigin(0, 0);
+        this.add.rectangle(603, 5, 32, 455, 0xFFFFFF).setOrigin(0, 0);
+        // green UI background
+        this.add.rectangle(37, 42, 566, 64, 0x00FF00).setOrigin(0, 0);
     }
 }
