@@ -5,12 +5,14 @@ let config = {
     width: 640,
     height: 480,
     fps: {
-        target: 140,
+        // smoothStep: true,
+        target: 30,
     },
     physics: {
         default: 'arcade',
         arcade: {
             debug: true,
+            fps: 140,
         },
     },
     scene: [ Menu, Arena ],

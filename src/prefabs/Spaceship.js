@@ -14,7 +14,7 @@ class Spaceship extends Phaser.GameObjects.Sprite {
         // add object to existing scene
         scene.add.existing(this);
         scene.physics.world.enableBody(this);
-        this.body.velocity.x = -this.speed * 60;
+        this.body.setVelocity(-this.speed, 0);
 
     }
 

@@ -5,7 +5,7 @@ class Arena extends Phaser.Scene {
     constructor() {
         super("arenaScene");
     }
-
+    
     preload() {
         // load images/tile sprites
         this.load.image('rocket', './assets/rocket.png');
@@ -22,8 +22,9 @@ class Arena extends Phaser.Scene {
         this.starfield = this.add.tileSprite(0, 0, 640, 480, 'starfield').setOrigin(0, 0);
         // white rectangular borders
         
-        this.drawUI();
-        this.inputSetup();
+        this.drawWorld();
+        this.inputSetup();   
+        
         
         //create explosion animation from preloaded spritesheet
         this.anims.create({
@@ -86,6 +87,10 @@ class Arena extends Phaser.Scene {
         console.log('p1 score 66:' + this.p1Score);
 
         this.physics.add.overlap(this.spaceshipGroup, this.p1Rocket, this.destroyEvent, null, this);
+        console.log(this.rocketBoundaries);
+        this.physics.add.collider(this.p1Rocket, this.rocketBoundaries, function () {
+            console.log('collision rocket boundary');
+        });
         
         // score
         
@@ -99,7 +104,7 @@ class Arena extends Phaser.Scene {
             this.add.text(game.config.width/2, game.config.height/2 + 64, 'R to (R)estart, Spacebar for Menu', scoreConfig).setOrigin(0.5);
             this.gameOver = true;
             this.disableObjects();
-        }, null, this);     
+        }, null, this);  
     }
     
 
@@ -108,11 +113,13 @@ class Arena extends Phaser.Scene {
         // check key input for restart
         if (this.gameOver) {
             if (this.gameOver && Phaser.Input.Keyboard.JustDown(keyR)) {
-                this.scene.restart(this.p1Score);
+                
             }
             if (Phaser.Input.Keyboard.JustDown(keySPACE)) {
                 this.scene.start('menuScene');
             }
+        } else {
+            this.inputCheck(); 
         }
         
         // scroll tile sprite
@@ -122,7 +129,7 @@ class Arena extends Phaser.Scene {
             // update rocket
             this.p1Rocket.update();
         }
-*/      
+*/      // console.log(this.p1Rocket.x + ', ' + this.p1Rocket.y);
 
 
         // if(this.checkCollision(this.p1Rocket, this.ship03)) {
@@ -190,15 +197,17 @@ class Arena extends Phaser.Scene {
         this.changeScore(spaceship.points);
         console.log('score after in destroyEvent:' + this.p1Score);
 
-        // on destroy event, spawn a new one in respective tiers
+        // on destroy event, spawn a new spaceship in same y coordinate
+        // with same tier of points
 
-        //  (instead of just resetting position, I simply destroy the game object
-        //  and respawn a new one. it's probably less efficient, but it seemed to
-        //  make more sense)
+        // (instead of just resetting position, I simply destroy the game object
+        // and respawn a new one. it's probably less efficient, but it seemed to
+        // make more sense)
 
         this.spaceshipGroup.add(this.shipAdd(game.config.width, spaceship.y, spaceship.points));
         
         this.shipDestroy(spaceship, rocket);
+        this.p1Rocket.reset();
     }
     
     shipDestroy(spaceship, rocket) {
@@ -212,12 +221,18 @@ class Arena extends Phaser.Scene {
         // this.ship02.setActive(false);
         // this.ship03.setActive(false);
         this.spaceshipGroup.children.each(function (spaceship) {
-            // spaceship.setActive(false);
+            // disable physics:
             this.physics.world.disableBody(spaceship.body);
-            // this.spaceshipGroup.killAndHide(spaceship);
+
+            // set inactive then hide:
+            this.spaceshipGroup.killAndHide(spaceship);
         }, this);
+        // disable rocket physics
+        this.physics.world.disableBody(this.p1Rocket);
+
+        // stop rocket movement and set inactive
+        this.p1Rocket.rocketStrafe(Phaser.Math.Vector2.ZERO);
         this.p1Rocket.setActive(false);
-        this.starfield.setActive(false);
 
     }
     
@@ -229,18 +244,66 @@ class Arena extends Phaser.Scene {
     }
 
     inputSetup() {
+        // define input manager
         keyF = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
         keyR = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
         keyLEFT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
         keyRIGHT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
         keySPACE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     }
+
+    // input checking function for update()
+    inputCheck() {
+        if (this.gameOver) {
+            if (keyR.isDown) {
+                this.scene.restart(this.p1Score);
+            }
+            if (keySPACE.isDown) {
+                this.scene.start('menuScene');
+            }
+        } else {
+            if (keyLEFT.isDown) {
+                // this.events.emit('keyLEFT');
+                this.p1Rocket.rocketStrafe(Phaser.Math.Vector2.LEFT);
+                console.log('pressing left in arena');
+                if (keyRIGHT.isDown) {
+                    this.p1Rocket.rocketStrafe(Phaser.Math.Vector2.ZERO);
+                }
+            } else if (keyRIGHT.isDown) {
+                this.p1Rocket.rocketStrafe(Phaser.Math.Vector2.RIGHT);
+            } else if (keyLEFT.isUp && keyRIGHT.isUp) {
+                this.p1Rocket.rocketStrafe(Phaser.Math.Vector2.ZERO);
+            }
+        }
+
+
     
-    drawUI() {
-        this.add.rectangle(5, 5, 630, 32, 0xFFFFFF).setOrigin(0, 0);
-        this.add.rectangle(5, 443, 630, 32, 0xFFFFFF).setOrigin(0, 0);
-        this.add.rectangle(5, 5, 32, 455, 0xFFFFFF).setOrigin(0, 0);
-        this.add.rectangle(603, 5, 32, 455, 0xFFFFFF).setOrigin(0, 0);
+
+        // fire button
+        // if(keyF.isDown) {
+        //     console.log('fire rocket');
+        //     this.sfxRocket.play();  // play sfx
+        // }
+    }
+    
+    drawWorld() {
+        
+        // make an array of rectangles as a boundary for the rocket
+        var rectangleContainer = [
+            this.physics.world.enableBody(this.add.rectangle(5, 5, 630, 32, 0xFFFFFF)).setOrigin(0, 0),
+            this.physics.world.enableBody(this.add.rectangle(5, 443, 630, 32, 0xFFFFFF)).setOrigin(0, 0),
+            this.physics.world.enableBody(this.add.rectangle(5, 5, 32, 455, 0xFFFFFF)).setOrigin(0, 0),
+            this.physics.world.enableBody(this.add.rectangle(603, 5, 32, 455, 0xFFFFFF)).setOrigin(0, 0),
+        ];
+
+        // add the rectangles to a arcade physics group so we can check for collision
+        this.rocketBoundaries = this.physics.add.group(rectangleContainer);
+
+        // make each immovable so player and obstacle stays in bounds
+        this.rocketBoundaries.children.iterate((rectangle) => {
+            rectangle.body.immovable = true;
+        }, this);
+        
         // green UI background
         this.add.rectangle(37, 42, 566, 64, 0x00FF00).setOrigin(0, 0);
     }
