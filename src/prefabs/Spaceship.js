@@ -2,9 +2,9 @@
 'use strict';
 class Spaceship extends Phaser.GameObjects.Sprite {
     constructor(scene, x, y, texture, frame, pointValue) {
-        super(scene, x, y, texture, frame);
-
         
+        // call parent constructor
+        super(scene, x, y, texture, frame);
         
         //store point value
         this.points = pointValue;
@@ -19,11 +19,9 @@ class Spaceship extends Phaser.GameObjects.Sprite {
         
         scene.physics.world.enableBody(this);
         this.body.setVelocity(-this.speed, 0);
-
     }
 
     preUpdate() {
-        // move spaceship left
         
         // wraparound from left to right edge
         if(this.x <= 0 - this.width) {
@@ -32,7 +30,7 @@ class Spaceship extends Phaser.GameObjects.Sprite {
     }
 
     onExplode(scene) {
-        console.log(scene);
+        
         scene.physics.world.disableBody(this.body);
         this.alpha = 0;                         // temporarily hide ship
         
@@ -40,15 +38,17 @@ class Spaceship extends Phaser.GameObjects.Sprite {
         let boom = scene.add.sprite(this.x, this.y, 'explosion').setOrigin(0, 0);
 
         boom.anims.play('explode');             // play explode animation
+    
+        boom.on('animationcomplete', () => {
+            boom.destroy();                     // destroy animation sprite
+            this.destroy();                     // technically, I don't want to destroy the spaceship until after the animation is over
+        })
+
         scene.sound.play('sfx_explosion');      // play explosion sound
-        this.destroy();                         // destroy gameobject
     }
 
-    // checkCollision() {
-    //     this.physics.add.collider();
-    // }
-
     reset() {
+        
         this.x = game.config.width;
     }
 }
