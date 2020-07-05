@@ -7,7 +7,7 @@ class Rocket extends Phaser.GameObjects.Sprite {
         // add object to existing scene
         scene.add.existing(this);
 
-        this.inputListenerSetup();  
+        this.inputListenerSetup();
         //track rocket's firing status
         this.isFiring = false;
 
@@ -49,9 +49,15 @@ class Rocket extends Phaser.GameObjects.Sprite {
         }
     }
 
-    fire() {
-
+    fire() {   
+        if (!this.isFiring) {
+            this.isFiring = true;
+            this.body.setVelocity(0, 0);
+            this.sfxRocket.play();
+        }
     }
+
+
 
     // reset rocekt to "ground"
     reset() {
@@ -60,10 +66,14 @@ class Rocket extends Phaser.GameObjects.Sprite {
         this.y = 431;
     }
 
+    // change left/right
     rocketStrafe(direction) {
         // I thought it would make sense to get the x values as a Vector2 object
-        this.body.setVelocity(direction.x * this.moveSpeed, direction.y);
+        if (!this.isFiring) {
+            this.body.setVelocity(direction.x * this.moveSpeed, direction.y);
+        }
     }
+
     inputListenerSetup(scene) {
         // scene.input.keyboard.on('keydown-LEFT', this.move, this)
     }

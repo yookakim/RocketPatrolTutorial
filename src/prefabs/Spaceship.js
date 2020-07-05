@@ -10,9 +10,13 @@ class Spaceship extends Phaser.GameObjects.Sprite {
         this.points = pointValue;
         this.speed = game.settings.spaceshipSpeed;
         
-        //console.log(game.settings.spaceshipSpeed);
+        // i set the origin to the corner here so that we avoid
+        // the physics plugin shifting it in weird ways
+        this.setOrigin(0, 0);
+
         // add object to existing scene
         scene.add.existing(this);
+        
         scene.physics.world.enableBody(this);
         this.body.setVelocity(-this.speed, 0);
 
@@ -34,19 +38,10 @@ class Spaceship extends Phaser.GameObjects.Sprite {
         
         // create explosion sprite at ship's position
         let boom = scene.add.sprite(this.x, this.y, 'explosion').setOrigin(0, 0);
+
         boom.anims.play('explode');             // play explode animation
-        boom.on('animationcomplete', () => {    // callback after animation completes
-            console.log('reset position');
-            this.reset();                       // reset ship position
-            this.alpha = 1;                     // make ship visible again
-            boom.destroy();                     // remove explosion sprite
-        });       
-        // score increment and repaint
-        // scene.changeScore(ship.points);
-        // scene.events.emit('spaceshipDestroyed', this.points);
-        // scene.scoreLeft.text = scene.p1Score;
-        scene.sound.play('sfx_explosion');
-        this.destroy();
+        scene.sound.play('sfx_explosion');      // play explosion sound
+        this.destroy();                         // destroy gameobject
     }
 
     // checkCollision() {

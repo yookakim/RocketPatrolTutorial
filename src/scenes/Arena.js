@@ -113,7 +113,7 @@ class Arena extends Phaser.Scene {
         // check key input for restart
         if (this.gameOver) {
             if (this.gameOver && Phaser.Input.Keyboard.JustDown(keyR)) {
-                
+                this.scene.restart(this.p1Score);
             }
             if (Phaser.Input.Keyboard.JustDown(keySPACE)) {
                 this.scene.start('menuScene');
@@ -168,10 +168,8 @@ class Arena extends Phaser.Scene {
         // make sure our new/reused ship is seen and active
         tempShip.setActive(true);
         tempShip.setVisible(true);
-
-        // set origin to upper left corner
-        tempShip.setOrigin(0, 0);     
         
+        // return the spaceship
         return tempShip;
     }
 /*
@@ -195,7 +193,6 @@ class Arena extends Phaser.Scene {
     destroyEvent(spaceship, rocket) {
         // change score:
         this.changeScore(spaceship.points);
-        console.log('score after in destroyEvent:' + this.p1Score);
 
         // on destroy event, spawn a new spaceship in same y coordinate
         // with same tier of points
@@ -203,9 +200,18 @@ class Arena extends Phaser.Scene {
         // (instead of just resetting position, I simply destroy the game object
         // and respawn a new one. it's probably less efficient, but it seemed to
         // make more sense)
+        if (spaceship.points === 30) {
+            this.spaceshipGroup.add(this.shipAdd(game.config.width, 132, spaceship.points));
+        }
+        if (spaceship.points === 20) {
+            this.spaceshipGroup.add(this.shipAdd(game.config.width, 196, spaceship.points));
+            
+        }
+        if (spaceship.points === 10) {
+            this.spaceshipGroup.add(this.shipAdd(game.config.width, 260, spaceship.points));
+            
+        }
 
-        this.spaceshipGroup.add(this.shipAdd(game.config.width, spaceship.y, spaceship.points));
-        
         this.shipDestroy(spaceship, rocket);
         this.p1Rocket.reset();
     }
@@ -227,18 +233,20 @@ class Arena extends Phaser.Scene {
             // set inactive then hide:
             this.spaceshipGroup.killAndHide(spaceship);
         }, this);
-        // disable rocket physics
-        this.physics.world.disableBody(this.p1Rocket);
 
         // stop rocket movement and set inactive
         this.p1Rocket.rocketStrafe(Phaser.Math.Vector2.ZERO);
-        this.p1Rocket.setActive(false);
 
+        // disable rocket physics (do this after setting velocity to 0)
+        this.physics.world.disableBody(this.p1Rocket);
+
+        this.p1Rocket.setActive(false);
+        this.p1Rocket.destroy();
     }
     
 
     changeScore(score) {
-    //isolate score-changing function from shipDestroy, for more flexibility
+    // isolate score-changing function from shipDestroy, for more flexibility
         this.p1Score += score;
         this.scoreLeft.text = this.p1Score;
     }
@@ -261,12 +269,21 @@ class Arena extends Phaser.Scene {
             if (keySPACE.isDown) {
                 this.scene.start('menuScene');
             }
-        } else {
+        }
+        if (!this.gameOver) {
+
+            /*
+                // passing a vector2 into a parameter whos function primarily should only 
+                // be making horizontal calculations seems a little sus but i kept it cuz i like
+                // the Phaser vector2 constants (I should prolly just define it globally like the 
+                // keyboard inputs)
+            */
+
             if (keyLEFT.isDown) {
-                // this.events.emit('keyLEFT');
+                // go left
                 this.p1Rocket.rocketStrafe(Phaser.Math.Vector2.LEFT);
-                console.log('pressing left in arena');
                 if (keyRIGHT.isDown) {
+                    //if both Left and Right are down, stop horizontal movement
                     this.p1Rocket.rocketStrafe(Phaser.Math.Vector2.ZERO);
                 }
             } else if (keyRIGHT.isDown) {
@@ -274,16 +291,11 @@ class Arena extends Phaser.Scene {
             } else if (keyLEFT.isUp && keyRIGHT.isUp) {
                 this.p1Rocket.rocketStrafe(Phaser.Math.Vector2.ZERO);
             }
+
+            if (keyF.isDown) {
+                this.p1Rocket.fire();
+            }
         }
-
-
-    
-
-        // fire button
-        // if(keyF.isDown) {
-        //     console.log('fire rocket');
-        //     this.sfxRocket.play();  // play sfx
-        // }
     }
     
     drawWorld() {
@@ -303,7 +315,7 @@ class Arena extends Phaser.Scene {
         this.rocketBoundaries.children.iterate((rectangle) => {
             rectangle.body.immovable = true;
         }, this);
-        
+
         // green UI background
         this.add.rectangle(37, 42, 566, 64, 0x00FF00).setOrigin(0, 0);
     }
