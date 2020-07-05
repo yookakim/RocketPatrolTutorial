@@ -18,8 +18,8 @@ renamed "Play.js" and playScene to Arena.js and arenaScene (no
     confusion with Player.js)
 
 8 PM
-(---2pm 7/2/2020) reworked individual new instances of Spaceship as 
-    going into gameobject group
+reworked individual new instances of Spaceship as going into 
+    gameobject group
 
 9 PM
 changed prefab update() methods to run individually 
@@ -30,8 +30,8 @@ changed prefab update() methods to run individually
 7/2/2020
 
 2 PM
-stopped using groups for the spaceships in interest of time; 
-    assign to individual variables instead through function return
+assign spaceships to individual variables instead through function return
+
 
 
 
