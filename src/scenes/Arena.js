@@ -35,6 +35,7 @@ class Arena extends Phaser.Scene {
         this.add.rectangle(37, 42, 566, 64, 0x00FF00).setOrigin(0, 0);
 
         this.p1Score = 0;
+        this.secondsRemaining = game.settings.gameTimer / 1000;
 
         // prizeship things
         this.p1Streak = 0;
@@ -42,7 +43,7 @@ class Arena extends Phaser.Scene {
         this.prizeshipActive = false;
 
         // scoreboard setup
-        let scoreConfig = {
+        let UIConfig = {
             fontFamily: 'Courier',
             fontSize: '28px',
             backgroundColor: '#F3B141',
@@ -55,7 +56,10 @@ class Arena extends Phaser.Scene {
             fixedWidth: 100
         }
     
-        this.scoreLeft = this.add.text(69, 54, this.p1Score, scoreConfig);
+        this.scoreLeft = this.add.text(69, 54, this.p1Score, UIConfig);
+        this.timerUI = this.add.text(190, 54, this.secondsRemaining, UIConfig);
+        this.highscoreUI = this.add.text(321, 54, 'HS: ' + globalHighScore, UIConfig);
+
 
         // setup input
         this.inputSetup();   
@@ -105,14 +109,23 @@ class Arena extends Phaser.Scene {
         this.gameOver = false;
         
         // 60-second game clock
-        scoreConfig.fixedWidth = 0;
+        UIConfig.fixedWidth = 0;
+
+        this.timerSecondSplit = this.time.addEvent({
+            delay: 1000,
+            repeat: game.settings.gameTimer / 60,
+            callback: this.updateTimerUI,
+            callbackScope: this,
+        })
 
         this.clock = this.time.delayedCall(game.settings.gameTimer, () => {
-            this.add.text(game.config.width/2, game.config.height/2, 'GAME OVER', scoreConfig).setOrigin(0.5);
-            this.add.text(game.config.width/2, game.config.height/2 + 64, 'R to (R)estart, Spacebar for Menu', scoreConfig).setOrigin(0.5);
+            this.add.text(game.config.width/2, game.config.height/2, 'GAME OVER', UIConfig).setOrigin(0.5);
+            this.add.text(game.config.width/2, game.config.height/2 + 64, 'R to (R)estart, Spacebar for Menu', UIConfig).setOrigin(0.5);
             this.gameOver = true;
             this.disableObjects();
         }, null, this);  
+
+        // this.timerSecondSplit.start();
     }
     
 
@@ -182,7 +195,7 @@ class Arena extends Phaser.Scene {
             this.spaceshipGroup.add(this.shipAdd(game.config.width, 260, spaceship.points));            
         }
 
-        if (this.p1Streak % 2 === 0) {
+        if (this.p1Streak % 3 === 0) {
             this.spawnPrizeship();
         }
         this.shipDestroy(spaceship, rocket);
@@ -211,6 +224,10 @@ class Arena extends Phaser.Scene {
 
         this.p1Rocket.setActive(false);
         this.p1Rocket.destroy();
+
+        if (this.p1Score > globalHighScore) {
+            globalHighScore = this.p1Score;
+        }
     }
     
 
@@ -275,6 +292,13 @@ class Arena extends Phaser.Scene {
         }
     }
     
+    updateTimerUI() {
+        if (!this.gameOver) {
+            this.secondsRemaining--;
+            this.timerUI.text = this.secondsRemaining;
+        }
+    }
+
     drawWorld() {
         
         // this.planet1 = this.add.sprite(-200, 300, 'planet1').setScale(6, 6);
