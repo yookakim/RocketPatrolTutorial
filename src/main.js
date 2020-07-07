@@ -1,4 +1,13 @@
 //create game configuration object
+
+/*  points breakdown:
+        Rework spaceship, rocket, and explosion sprites/assets: 25
+        Create a new spaceship type with new artwork that is smaller and faster: 25
+        Implement parallax scrolling: 15
+
+        total (as of 12:25 am July 7 2020 after due date): 65 points/100
+*/
+
 'use strict';
 let config = {
     type: Phaser.Canvas,
