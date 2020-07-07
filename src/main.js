@@ -8,9 +8,9 @@ let config = {
         // smoothStep: true,
         target: 30,
     },
-    render: {
-        pixelArt: true,
-    },
+    
+    pixelArt: true,
+    
     physics: {
         default: 'arcade',
         arcade: {

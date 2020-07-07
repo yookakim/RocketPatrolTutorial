@@ -38,6 +38,11 @@ class Rocket extends Phaser.GameObjects.Sprite {
         // reset on miss
         if(this.y <= 108) {
             this.reset();
+
+            // in the future when I have time i would probably set up a listener
+            // instead of making a reference to the scene like this
+            this.scene.p1Streak = 0;
+            this.scene.p1StreakLast = 0;
         }
     }
 

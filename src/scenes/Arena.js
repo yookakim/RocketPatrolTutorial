@@ -11,19 +11,23 @@ class Arena extends Phaser.Scene {
         // load images/tile sprites
         // this.load.image('rocket', './assets/rocket.png');
         this.load.image('spaceship', './assets/spaceship.png');
+        this.load.image('prizeship', './assets/prizeship.png');
         this.load.image('starfield', './assets/starfield.png');
+        this.load.image('planets', './assets/planets.png');
         this.load.image('planet1', './assets/planet1.png');
-        this.load.image('asteroid1', './assets/asteroid1.png');
+        this.load.image('asteroidfield', './assets/asteroidfield.png');
         
         // load spritesheets
-        this.load.spritesheet('explosion', './assets/explosion.png', {frameWidth: 64, frameHeight: 32, startFrame: 0, endFrame: 9});
+        this.load.spritesheet('explosion', './assets/explosion2.png', {frameWidth: 64, frameHeight: 32, startFrame: 0, endFrame: 7});
         this.load.spritesheet('rocketanim', './assets/rocketanim.png', {frameWidth: 32, frameHeight: 16, startFrame: 0, endFrame: 7});
+        
     }
     
     create() {
         
         this.starfield = this.add.tileSprite(0, 0, 640, 480, 'starfield').setOrigin(0, 0);
-        // white rectangular borders
+        this.planets = this.add.tileSprite(0, 0, 0, 0, 'planets').setOrigin(0, 0).setScale(6, 6);
+        this.asteroidfield = this.add.tileSprite(0, 0, 0, 0, 'asteroidfield').setOrigin(0, 0).setScale(6, 6);
         
         this.drawWorld();
 
@@ -31,6 +35,11 @@ class Arena extends Phaser.Scene {
         this.add.rectangle(37, 42, 566, 64, 0x00FF00).setOrigin(0, 0);
 
         this.p1Score = 0;
+
+        // prizeship things
+        this.p1Streak = 0;
+        this.p1StreakLast = 0;
+        this.prizeshipActive = false;
 
         // scoreboard setup
         let scoreConfig = {
@@ -120,11 +129,21 @@ class Arena extends Phaser.Scene {
             }
         } else {
             this.inputCheck(); 
+
         }
         
         // scroll tile sprite
-        this.starfield.tilePositionX -= 1 * delta/60;
-            }
+        this.starfield.tilePositionX -= 2 * delta/60;
+        this.planets.tilePositionX -= 3 * delta/360;
+        this.asteroidfield.tilePositionX -= 7 * delta/360;
+    }
+
+    spawnPrizeship() {
+        this.spaceshipGroup.add(new Prizeship(this, game.config.width, 340, 'prizeship', 0, 60));
+        // this.prizeshipActive = true;
+        // this.p1Streak = this.p1Streak + this.p1StreakLast;
+        // this.p1StreakLast = 0;
+    }
 
     shipAdd(x, y, pointsValue) {
         
@@ -143,6 +162,9 @@ class Arena extends Phaser.Scene {
         // change score:
         this.changeScore(spaceship.points);
 
+        // add streak:
+        this.p1Streak++;
+
         // on destroy event, spawn a new spaceship in same y coordinate
         // with same tier of points
 
@@ -160,6 +182,9 @@ class Arena extends Phaser.Scene {
             this.spaceshipGroup.add(this.shipAdd(game.config.width, 260, spaceship.points));            
         }
 
+        if (this.p1Streak % 2 === 0) {
+            this.spawnPrizeship();
+        }
         this.shipDestroy(spaceship, rocket);
         this.p1Rocket.reset();
     }
@@ -252,15 +277,12 @@ class Arena extends Phaser.Scene {
     
     drawWorld() {
         
-        this.planet1 = this.add.sprite(-200, 300, 'planet1').setScale(6, 6);
-        this.physics.world.enableBody(this.planet1);
-        this.planet1.body.velocity.x = 50;
-        this.planet1.z = -5;
+        // this.planet1 = this.add.sprite(-200, 300, 'planet1').setScale(6, 6);
+        // this.physics.world.enableBody(this.planet1);
+        // this.planet1.body.velocity.x = 50;
+        // this.planet1.z = -5;
         
-        this.asteroid1 = this.add.sprite(-700, 350, 'asteroid1').setScale(6, 6);
-        this.physics.world.enableBody(this.asteroid1);
-        this.asteroid1.body.velocity.x = 250;
-        this.asteroid1.z = -5;
+
 
         // make an array of rectangles as a boundary for the rocket
         var rectangleContainer = [
