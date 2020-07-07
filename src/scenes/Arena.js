@@ -7,14 +7,17 @@ class Arena extends Phaser.Scene {
     }
     
     preload() {
-        
+
         // load images/tile sprites
-        this.load.image('rocket', './assets/rocket.png');
+        // this.load.image('rocket', './assets/rocket.png');
         this.load.image('spaceship', './assets/spaceship.png');
         this.load.image('starfield', './assets/starfield.png');
+        this.load.image('planet1', './assets/planet1.png');
+        this.load.image('asteroid1', './assets/asteroid1.png');
         
-        // load spritesheet
+        // load spritesheets
         this.load.spritesheet('explosion', './assets/explosion.png', {frameWidth: 64, frameHeight: 32, startFrame: 0, endFrame: 9});
+        this.load.spritesheet('rocketanim', './assets/rocketanim.png', {frameWidth: 32, frameHeight: 16, startFrame: 0, endFrame: 7});
     }
     
     create() {
@@ -52,18 +55,25 @@ class Arena extends Phaser.Scene {
         this.anims.create({
             key: 'explode',
             frames: this.anims.generateFrameNumbers('explosion', { start: 0, end: 9, first: 0}),
-            frameRate: 30
+            frameRate: 24,
         });
         
-
-        this.scoreLeft.on('scoreChange', function() {
-            this.scoreLeft.updateText();
+        this.anims.create({
+            key: 'rocketfire',
+            frames: this.anims.generateFrameNumbers('rocketanim', { start: 0, end: 7, first: 0}),
+            frameRate: 8,
+            repeat: -1,
         })
+        
+        this.p1Rocket = new Rocket(this, game.config.width/2, 431, 'rocketanim', 0);
+
+        // this.scoreLeft.on('scoreChange', function() {
+        //     this.scoreLeft.updateText();
+        // })
 
         // add rocket (player 1)
-        this.p1Rocket = new Rocket(this, game.config.width/2, 431, 'rocket', 0);
         
-        this.p1Rocket.setScale(0.5, 0.5);
+        // this.p1Rocket.setScale(0.5, 0.5);
         this.p1Rocket.setOrigin(0, 0);
         this.p1Rocket.setActive(true);                
         
@@ -87,6 +97,7 @@ class Arena extends Phaser.Scene {
         
         // 60-second game clock
         scoreConfig.fixedWidth = 0;
+
         this.clock = this.time.delayedCall(game.settings.gameTimer, () => {
             this.add.text(game.config.width/2, game.config.height/2, 'GAME OVER', scoreConfig).setOrigin(0.5);
             this.add.text(game.config.width/2, game.config.height/2 + 64, 'R to (R)estart, Spacebar for Menu', scoreConfig).setOrigin(0.5);
@@ -112,7 +123,7 @@ class Arena extends Phaser.Scene {
         }
         
         // scroll tile sprite
-        this.starfield.tilePositionX -= 8 * delta/60;
+        this.starfield.tilePositionX -= 1 * delta/60;
             }
 
     shipAdd(x, y, pointsValue) {
@@ -155,7 +166,6 @@ class Arena extends Phaser.Scene {
     
     shipDestroy(spaceship, rocket) {
 
-        this.changeScore(spaceship.points);
         spaceship.onExplode(this);
     }
     
@@ -234,6 +244,7 @@ class Arena extends Phaser.Scene {
             }
 
             if (keyF.isDown) {
+                //this.p1Rocket.play('rocketfire');
                 this.p1Rocket.fire();
             }
         }
@@ -241,6 +252,16 @@ class Arena extends Phaser.Scene {
     
     drawWorld() {
         
+        this.planet1 = this.add.sprite(-200, 300, 'planet1').setScale(6, 6);
+        this.physics.world.enableBody(this.planet1);
+        this.planet1.body.velocity.x = 50;
+        this.planet1.z = -5;
+        
+        this.asteroid1 = this.add.sprite(-700, 350, 'asteroid1').setScale(6, 6);
+        this.physics.world.enableBody(this.asteroid1);
+        this.asteroid1.body.velocity.x = 250;
+        this.asteroid1.z = -5;
+
         // make an array of rectangles as a boundary for the rocket
         var rectangleContainer = [
             this.physics.world.enableBody(this.add.rectangle(5, 5, 630, 32, 0xFFFFFF)).setOrigin(0, 0),
@@ -252,9 +273,11 @@ class Arena extends Phaser.Scene {
         // add the rectangles to a arcade physics group so we can check for collision
         this.rocketBoundaries = this.physics.add.group(rectangleContainer);
 
+
         // make each immovable so player and obstacle stays in bounds
         this.rocketBoundaries.children.iterate((rectangle) => {
             rectangle.body.immovable = true;
+            rectangle.setDepth(1000);
         }, this);
     }
 }

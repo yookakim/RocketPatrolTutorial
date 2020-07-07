@@ -1,0 +1,17 @@
+todo list
+
+
+features:
+create timer
+
+
+aesthetics:
+create new assets
+    done:
+        spaceship
+
+    next:
+        rocket
+        explosion
+        sound
+        music

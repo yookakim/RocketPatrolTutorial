@@ -6,8 +6,11 @@ class Rocket extends Phaser.GameObjects.Sprite {
         // parent constructor
         super(scene, x, y, texture, frame);
 
+        this.scene = scene;
+        // this.fireAnimation = scene.add.sprite(this.x, this.y, 'rocket_anim').setOrigin(0, 0);
         // add object to existing scene
         scene.add.existing(this);
+        
 
         //track rocket's firing status
         this.isFiring = false;
@@ -22,7 +25,10 @@ class Rocket extends Phaser.GameObjects.Sprite {
         this.sfxRocket = scene.sound.add('sfx_rocket');
     }
 
-    preUpdate() {
+    preUpdate(time, delta) {
+
+        // animations updated in parent preUpdate
+        super.preUpdate(time, delta);
 
         // if fired, move up
         if(this.isFiring && this.y >= 108) {
@@ -40,6 +46,8 @@ class Rocket extends Phaser.GameObjects.Sprite {
             this.isFiring = true;
             this.body.setVelocity(0, 0);
             this.sfxRocket.play();
+            //console.log(this.anims.getTotalFrames());
+            this.play('rocketfire');
         }
     }
 
@@ -47,6 +55,7 @@ class Rocket extends Phaser.GameObjects.Sprite {
     reset() {
 
         this.isFiring = false;
+        this.anims.pause();
         this.body.setVelocity(0, 0);
         this.y = 431;
     }

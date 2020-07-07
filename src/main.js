@@ -8,10 +8,13 @@ let config = {
         // smoothStep: true,
         target: 30,
     },
+    render: {
+        pixelArt: true,
+    },
     physics: {
         default: 'arcade',
         arcade: {
-            debug: true,
+            // debug: false,
             fps: 140,
         },
     },
