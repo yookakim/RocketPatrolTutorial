@@ -10,6 +10,8 @@
         Display the remaining time in seconds on the screen: 15
         track a high score that persists across screens: 10
         total (as of 1:09 am): 90 points
+
+        -- Yooha Kim (1548605)
 */
 
 'use strict';
@@ -36,7 +38,6 @@ let config = {
     },
     scene: [ Menu, Arena ],
 }
-
 
 //create game object...
 let game = new Phaser.Game(config);
